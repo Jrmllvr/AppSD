@@ -323,12 +323,20 @@ function updateCodeSummary(
 
     const total = codeEntries.length;
 
+    const daysId =
+        code === "S" ? "daysS" : "daysD";
 
+
+    // Total d'occurrences
     document.getElementById(totalId).textContent =
         total;
 
 
+    // Aucune occurrence
     if (total === 0) {
+
+        document.getElementById(daysId).textContent =
+            "—";
 
         document.getElementById(averageId).textContent =
             "—";
@@ -337,33 +345,37 @@ function updateCodeSummary(
     }
 
 
-    if (total === 1) {
-
-        document.getElementById(averageId).textContent =
-            "0 j";
-
-        return;
-    }
-
-
+    // Première occurrence
     const firstDate =
         new Date(codeEntries[0].date);
 
-    const lastDate =
-        new Date(codeEntries[total - 1].date);
+
+    // Date du jour
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
 
 
+    // Nombre de jours écoulés
     const difference =
-        (lastDate - firstDate)
-        / (1000 * 60 * 60 * 24);
+        Math.floor(
+            (today - firstDate)
+            / (1000 * 60 * 60 * 24)
+        );
 
 
+    // Affichage des jours écoulés
+    document.getElementById(daysId).textContent =
+        `${difference} jours`;
+
+
+    // Calcul de la moyenne
     const average =
         difference / total;
 
 
     document.getElementById(averageId).textContent =
-        `${average.toFixed(1)} j`;
+        `${average.toFixed(1)} jours`;
 
 }
 
