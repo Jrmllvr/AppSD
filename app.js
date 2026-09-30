@@ -508,3 +508,197 @@ document.getElementById("exportButton").addEventListener("click", () => {
     );
 
 });
+// --------------------------------------------------
+// IMPORT EXCEL
+// --------------------------------------------------
+
+const importButton = document.getElementById("importButton");
+const importFile = document.getElementById("importFile");
+
+importButton.addEventListener("click", function () {
+
+    importFile.click();
+
+});
+
+
+importFile.addEventListener("change", function (event) {
+
+    const file = event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+
+        try {
+
+            const workbook = XLSX.read(
+                event.target.result,
+                { type: "array" }
+            );
+
+            const sheet =
+                workbook.Sheets[workbook.SheetNames[0]];
+
+            const rows =
+                XLSX.utils.sheet_to_json(
+                    sheet,
+                    { header: 1 }
+                );
+
+            const importedEntries = [];
+
+
+            // Lire les lignes du tableau
+            for (let i = 1; i < rows.length; i++) {
+
+                const row = rows[i];
+
+                if (!row || !row[0] || !row[1]) {
+                    continue;
+                }
+
+                let date = row[0];
+                let code = String(row[1]).trim().toUpperCase();
+
+
+                // Date Excel
+                if (typeof date === "number") {
+
+                    const excelDate =
+                        new Date(
+                            Date.UTC(
+                                1899,
+                                11,
+                                30
+                            )
+                            + date * 86400000
+                        );
+
+                    const year =
+                        excelDate.getUTCFullYear();
+
+                    const month =
+                        String(
+                            excelDate.getUTCMonth() + 1
+                        ).padStart(2, "0");
+
+                    const day =
+                        String(
+                            excelDate.getUTCDate()
+                        ).padStart(2, "0");
+
+                    date =
+                        `${year}-${month}-${day}`;
+                }
+
+
+                // Date sous forme JJ/MM/AA
+                else if (
+                    typeof date === "string" &&
+                    date.includes("/")
+                ) {
+
+                    const parts = date.split("/");
+
+                    if (parts.length === 3) {
+
+                        let year = parts[2];
+
+                        if (year.length === 2) {
+                            year = "20" + year;
+                        }
+
+                        date =
+                            `${year}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+                    }
+                }
+
+
+                if (
+                    (code === "S" || code === "D") &&
+                    /^\d{4}-\d{2}-\d{2}$/.test(date)
+                ) {
+
+                    importedEntries.push({
+                        date: date,
+                        code: code
+                    });
+
+                }
+
+            }
+
+
+            if (importedEntries.length === 0) {
+
+                alert(
+                    "Aucune entrée valide n'a été trouvée."
+                );
+
+                return;
+            }
+
+
+            if (
+                !confirm(
+                    "Importer " +
+                    importedEntries.length +
+                    " entrées ?\n\n" +
+                    "Les données actuelles seront remplacées."
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            entries = importedEntries;
+
+
+            // Tri chronologique
+            entries.sort(function (a, b) {
+
+                return new Date(a.date) -
+                       new Date(b.date);
+
+            });
+
+
+            // Sauvegarde
+            saveData();
+
+
+            // Actualisation
+            renderTable();
+            updateSummary();
+
+
+            alert("Import terminé avec succès.");
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Une erreur est survenue lors de l'import."
+            );
+
+        }
+
+    };
+
+
+    reader.readAsArrayBuffer(file);
+
+    // Permet de sélectionner à nouveau le même fichier
+    event.target.value = "";
+
+});

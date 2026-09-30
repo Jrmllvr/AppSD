@@ -188,6 +188,16 @@ td:first-child {
     <button class="export-button" id="exportButton">
     Export Excel
 </button>
+<button class="import-button" id="importButton">
+    Importer Excel
+</button>
+
+<input
+    type="file"
+    id="importFile"
+    accept=".xlsx,.xls"
+    style="display: none;"
+>
     <div id="modal" style="
     display: none;
     position: fixed;
@@ -203,7 +213,20 @@ td:first-child {
         max-width: 400px;
         border-radius: 16px;
         padding: 25px;
-    ">
+    ">.import-button {
+    display: block;
+    margin: 10px auto 0;
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: #007aff;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.import-button:active {
+    opacity: 0.6;
+}
 
         <h2>Ajouter une entrée</h2>
 
