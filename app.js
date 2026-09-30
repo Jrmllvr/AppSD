@@ -402,9 +402,6 @@ updateSummary();
 // --------------------------------------------------
 // EXPORT EXCEL
 // --------------------------------------------------
-// --------------------------------------------------
-// EXPORT EXCEL
-// --------------------------------------------------
 
 document.getElementById("exportButton").addEventListener("click", () => {
 
@@ -417,6 +414,8 @@ document.getElementById("exportButton").addEventListener("click", () => {
 
         let difference = "";
 
+        // Recherche de la précédente occurrence
+        // du même code
         for (let i = index - 1; i >= 0; i--) {
 
             if (entries[i].code === entry.code) {
@@ -441,10 +440,20 @@ document.getElementById("exportButton").addEventListener("click", () => {
     });
 
 
-    // Récapitulatif
+    // --------------------------------------------------
+    // RÉCAPITULATIF
+    // --------------------------------------------------
+
     data.push([]);
     data.push(["RÉCAPITULATIF"]);
     data.push(["Code", "Moyenne", "Total"]);
+
+
+    // Date du jour
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
 
     ["S", "D"].forEach(code => {
 
@@ -455,20 +464,29 @@ document.getElementById("exportButton").addEventListener("click", () => {
 
         let average = 0;
 
-        if (total > 1) {
 
+        // S'il existe au moins une occurrence
+        if (total > 0) {
+
+            // Première occurrence
             const firstDate =
                 new Date(codeEntries[0].date);
 
-            const lastDate =
-                new Date(codeEntries[total - 1].date);
-
+            // Nombre de jours depuis la première occurrence
             const difference =
-                (lastDate - firstDate)
-                / (1000 * 60 * 60 * 24);
+                Math.floor(
+                    (today - firstDate)
+                    / (1000 * 60 * 60 * 24)
+                );
 
-            average = difference / total;
+            // Formule :
+            // (date du jour - première occurrence)
+            // / nombre d'occurrences
+            average =
+                difference / total;
+
         }
+
 
         data.push([
             code,
@@ -479,12 +497,16 @@ document.getElementById("exportButton").addEventListener("click", () => {
     });
 
 
-    // Création du fichier Excel
+    // --------------------------------------------------
+    // CRÉATION DU FICHIER EXCEL
+    // --------------------------------------------------
+
     const worksheet =
         XLSX.utils.aoa_to_sheet(data);
 
     const workbook =
         XLSX.utils.book_new();
+
 
     XLSX.utils.book_append_sheet(
         workbook,
@@ -501,7 +523,10 @@ document.getElementById("exportButton").addEventListener("click", () => {
     ];
 
 
-    // Téléchargement
+    // --------------------------------------------------
+    // TÉLÉCHARGEMENT
+    // --------------------------------------------------
+
     XLSX.writeFile(
         workbook,
         "suivi-S-D.xlsx"
