@@ -73,7 +73,7 @@
         .summary {
             display: flex;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
 
@@ -100,6 +100,38 @@
             font-size: 14px;
             color: #666;
             line-height: 1.5;
+        }
+
+
+        /* --------------------------------------------------
+           BOUTON +
+           Placé sous les deux encadrés
+        -------------------------------------------------- */
+
+        .add-button {
+            display: block;
+
+            width: 100%;
+            height: 38px;
+
+            margin: 0 0 20px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: transparent;
+            color: #007aff;
+
+            font-size: 28px;
+            font-weight: 300;
+            line-height: 38px;
+
+            cursor: pointer;
+        }
+
+
+        .add-button:active {
+            background: #e5e5ea;
         }
 
 
@@ -167,39 +199,6 @@
             text-align: center;
             padding: 30px;
             color: #777;
-        }
-
-
-        /* --------------------------------------------------
-           BOUTON +
-        -------------------------------------------------- */
-
-        .add-button {
-            display: block;
-
-            width: 56px;
-            height: 56px;
-
-            margin: 25px auto 0;
-
-            border: none;
-            border-radius: 50%;
-
-            background: #007aff;
-            color: white;
-
-            font-size: 32px;
-            line-height: 56px;
-
-            cursor: pointer;
-
-            box-shadow:
-                0 3px 8px rgba(0,0,0,0.2);
-        }
-
-
-        .add-button:active {
-            transform: scale(0.95);
         }
 
 
@@ -503,6 +502,20 @@
 
 
     <!-- --------------------------------------------------
+         AJOUT
+    -------------------------------------------------- -->
+
+    <button
+        class="add-button"
+        type="button"
+        aria-label="Ajouter une entrée"
+        title="Ajouter une entrée"
+    >
+        +
+    </button>
+
+
+    <!-- --------------------------------------------------
          TABLEAU
     -------------------------------------------------- -->
 
@@ -542,18 +555,6 @@
         </table>
 
     </div>
-
-
-    <!-- --------------------------------------------------
-         AJOUT
-    -------------------------------------------------- -->
-
-    <button
-        class="add-button"
-        type="button"
-    >
-        +
-    </button>
 
 
     <!-- --------------------------------------------------
@@ -619,8 +620,6 @@
         </h2>
 
 
-        <!-- DATE -->
-
         <label for="dateInput">
             Date
         </label>
@@ -632,8 +631,6 @@
             autocomplete="off"
         >
 
-
-        <!-- CODE -->
 
         <label>
             Code
@@ -663,8 +660,6 @@
 
         </div>
 
-
-        <!-- ACTIONS -->
 
         <div class="modal-actions">
 
@@ -709,10 +704,6 @@
 
 <script src="app.js"></script>
 
-
-<!-- --------------------------------------------------
-     RETOUR EN HAUT
--------------------------------------------------- -->
 
 <script>
 

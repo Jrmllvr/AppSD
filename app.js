@@ -17,7 +17,12 @@ let editingIndex = null;
 // --------------------------------------------------
 
 function saveData() {
-    localStorage.setItem("entriesSD", JSON.stringify(entries));
+
+    localStorage.setItem(
+        "entriesSD",
+        JSON.stringify(entries)
+    );
+
 }
 
 
@@ -31,21 +36,38 @@ openButton.addEventListener("click", () => {
 
     const today = new Date();
 
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+    const year =
+        today.getFullYear();
 
-    dateInput.value = `${year}-${month}-${day}`;
+    const month =
+        String(today.getMonth() + 1)
+        .padStart(2, "0");
+
+    const day =
+        String(today.getDate())
+        .padStart(2, "0");
+
+
+    dateInput.value =
+        `${year}-${month}-${day}`;
+
 
     selectedCode = null;
 
-    document.querySelectorAll(".code-button").forEach(button => {
-        button.style.background = "";
-    });
+
+    document
+        .querySelectorAll(".code-button")
+        .forEach(button => {
+
+            button.style.background = "";
+
+        });
+
 
     saveButton.textContent = "Ajouter";
 
     modal.style.display = "flex";
+
 });
 
 
@@ -53,20 +75,31 @@ openButton.addEventListener("click", () => {
 // CHOIX DU CODE
 // --------------------------------------------------
 
-document.querySelectorAll(".code-button").forEach(button => {
+document
+    .querySelectorAll(".code-button")
+    .forEach(button => {
 
-    button.addEventListener("click", () => {
+        button.addEventListener("click", () => {
 
-        selectedCode = button.dataset.code;
+            selectedCode =
+                button.dataset.code;
 
-        document.querySelectorAll(".code-button").forEach(b => {
-            b.style.background = "";
+
+            document
+                .querySelectorAll(".code-button")
+                .forEach(b => {
+
+                    b.style.background = "";
+
+                });
+
+
+            button.style.background =
+                "#dbeafe";
+
         });
 
-        button.style.background = "#dbeafe";
     });
-
-});
 
 
 // --------------------------------------------------
@@ -87,19 +120,31 @@ cancelButton.addEventListener("click", () => {
 saveButton.addEventListener("click", () => {
 
     if (!dateInput.value) {
-        alert("Veuillez choisir une date.");
+
+        alert(
+            "Veuillez choisir une date."
+        );
+
         return;
     }
 
+
     if (!selectedCode) {
-        alert("Veuillez choisir S ou D.");
+
+        alert(
+            "Veuillez choisir S ou D."
+        );
+
         return;
     }
 
 
     const newEntry = {
+
         date: dateInput.value,
+
         code: selectedCode
+
     };
 
 
@@ -107,9 +152,11 @@ saveButton.addEventListener("click", () => {
 
     if (editingIndex !== null) {
 
-        entries[editingIndex] = newEntry;
+        entries[editingIndex] =
+            newEntry;
 
     }
+
 
     // Nouvelle entrée
 
@@ -123,13 +170,17 @@ saveButton.addEventListener("click", () => {
     // Tri chronologique
 
     entries.sort((a, b) => {
-        return new Date(a.date) - new Date(b.date);
+
+        return new Date(a.date) -
+               new Date(b.date);
+
     });
 
 
     saveData();
 
     renderTable();
+
     updateSummary();
 
 
@@ -149,13 +200,16 @@ function renderTable() {
 
     if (entries.length === 0) {
 
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
+
 
         row.innerHTML = `
             <td colspan="4" class="empty">
                 Aucune donnée
             </td>
         `;
+
 
         tableBody.appendChild(row);
 
@@ -171,25 +225,44 @@ function renderTable() {
         // Recherche de la précédente occurrence
         // du même code
 
-        for (let i = index - 1; i >= 0; i--) {
+        for (
+            let i = index - 1;
+            i >= 0;
+            i--
+        ) {
 
-            if (entries[i].code === entry.code) {
+            if (
+                entries[i].code ===
+                entry.code
+            ) {
 
-                const currentDate = new Date(entry.date);
-                const previousDate = new Date(entries[i].date);
+                const currentDate =
+                    new Date(entry.date);
+
+                const previousDate =
+                    new Date(entries[i].date);
+
 
                 const diff =
                     (currentDate - previousDate)
-                    / (1000 * 60 * 60 * 24);
+                    /
+                    (1000 * 60 * 60 * 24);
 
-                difference = `${diff} j`;
+
+                difference =
+                    `${diff} j`;
+
 
                 break;
+
             }
+
         }
 
 
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
+
 
         row.innerHTML = `
             <td>${formatDate(entry.date)}</td>
@@ -215,15 +288,21 @@ function renderTable() {
         // Bouton supprimer
 
         const deleteButton =
-            row.querySelector(".delete-button");
+            row.querySelector(
+                ".delete-button"
+            );
 
-        deleteButton.addEventListener("click", (event) => {
 
-            event.stopPropagation();
+        deleteButton.addEventListener(
+            "click",
+            (event) => {
 
-            deleteEntry(index);
+                event.stopPropagation();
 
-        });
+                deleteEntry(index);
+
+            }
+        );
 
 
         tableBody.appendChild(row);
@@ -241,31 +320,47 @@ function editEntry(index) {
 
     editingIndex = index;
 
-    const entry = entries[index];
 
-    dateInput.value = entry.date;
-
-    selectedCode = entry.code;
+    const entry =
+        entries[index];
 
 
-    document.querySelectorAll(".code-button").forEach(button => {
-
-        if (button.dataset.code === entry.code) {
-
-            button.style.background = "#dbeafe";
-
-        } else {
-
-            button.style.background = "";
-
-        }
-
-    });
+    dateInput.value =
+        entry.date;
 
 
-    saveButton.textContent = "Modifier";
+    selectedCode =
+        entry.code;
 
-    modal.style.display = "flex";
+
+    document
+        .querySelectorAll(".code-button")
+        .forEach(button => {
+
+            if (
+                button.dataset.code ===
+                entry.code
+            ) {
+
+                button.style.background =
+                    "#dbeafe";
+
+            } else {
+
+                button.style.background =
+                    "";
+
+            }
+
+        });
+
+
+    saveButton.textContent =
+        "Modifier";
+
+
+    modal.style.display =
+        "flex";
 
 }
 
@@ -276,16 +371,24 @@ function editEntry(index) {
 
 function deleteEntry(index) {
 
-    if (!confirm("Supprimer cette entrée ?")) {
+    if (
+        !confirm(
+            "Supprimer cette entrée ?"
+        )
+    ) {
+
         return;
+
     }
 
 
     entries.splice(index, 1);
 
+
     saveData();
 
     renderTable();
+
     updateSummary();
 
 }
@@ -303,6 +406,7 @@ function updateSummary() {
         "totalS"
     );
 
+
     updateCodeSummary(
         "D",
         "averageD",
@@ -319,63 +423,131 @@ function updateCodeSummary(
 ) {
 
     const codeEntries =
-        entries.filter(entry => entry.code === code);
-
-    const total = codeEntries.length;
-
-    const daysId =
-        code === "S" ? "daysS" : "daysD";
-
-
-    // Total d'occurrences
-    document.getElementById(totalId).textContent =
-        total;
-
-
-    // Aucune occurrence
-    if (total === 0) {
-
-        document.getElementById(daysId).textContent =
-            "—";
-
-        document.getElementById(averageId).textContent =
-            "—";
-
-        return;
-    }
-
-
-    // Première occurrence
-    const firstDate =
-        new Date(codeEntries[0].date);
-
-
-    // Date du jour
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-
-
-    // Nombre de jours écoulés
-    const difference =
-        Math.floor(
-            (today - firstDate)
-            / (1000 * 60 * 60 * 24)
+        entries.filter(
+            entry =>
+                entry.code === code
         );
 
 
-    // Affichage des jours écoulés
-    document.getElementById(daysId).textContent =
-        `${difference} jours`;
+    const total =
+        codeEntries.length;
 
 
-    // Calcul de la moyenne
+    const daysId =
+        code === "S"
+            ? "daysS"
+            : "daysD";
+
+
+    // Total d'occurrences
+
+    document
+        .getElementById(totalId)
+        .textContent = total;
+
+
+    // Aucune occurrence
+
+    if (total === 0) {
+
+        document
+            .getElementById(daysId)
+            .textContent = "—";
+
+
+        document
+            .getElementById(averageId)
+            .textContent = "—";
+
+
+        return;
+
+    }
+
+
+    // --------------------------------------------------
+    // DERNIÈRE OCCURRENCE
+    // --------------------------------------------------
+
+    const lastDate =
+        new Date(
+            codeEntries[
+                codeEntries.length - 1
+            ].date
+        );
+
+
+    // Date du jour
+
+    const today =
+        new Date();
+
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    // Nombre de jours depuis
+    // la DERNIÈRE occurrence
+
+    const differenceSinceLast =
+        Math.floor(
+            (
+                today -
+                lastDate
+            )
+            /
+            (1000 * 60 * 60 * 24)
+        );
+
+
+    // Affichage des jours
+
+    document
+        .getElementById(daysId)
+        .textContent =
+            `${differenceSinceLast} jours`;
+
+
+    // --------------------------------------------------
+    // MOYENNE
+    // --------------------------------------------------
+    // La moyenne reste calculée selon :
+    //
+    // (date du jour - première occurrence)
+    // / nombre d'occurrences
+    // --------------------------------------------------
+
+    const firstDate =
+        new Date(
+            codeEntries[0].date
+        );
+
+
+    const differenceSinceFirst =
+        Math.floor(
+            (
+                today -
+                firstDate
+            )
+            /
+            (1000 * 60 * 60 * 24)
+        );
+
+
     const average =
-        difference / total;
+        differenceSinceFirst /
+        total;
 
 
-    document.getElementById(averageId).textContent =
-        `${average.toFixed(1)} jours`;
+    document
+        .getElementById(averageId)
+        .textContent =
+            `${average.toFixed(1)} jours`;
 
 }
 
@@ -386,9 +558,13 @@ function updateCodeSummary(
 
 function formatDate(date) {
 
-    const parts = date.split("-");
+    const parts =
+        date.split("-");
 
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(2)}`;
+
+    return `
+        ${parts[2]}/${parts[1]}/${parts[0].slice(2)}
+    `;
 
 }
 
@@ -398,332 +574,540 @@ function formatDate(date) {
 // --------------------------------------------------
 
 renderTable();
+
 updateSummary();
+
+
 // --------------------------------------------------
 // EXPORT EXCEL
 // --------------------------------------------------
 
-document.getElementById("exportButton").addEventListener("click", () => {
+document
+    .getElementById("exportButton")
+    .addEventListener(
+        "click",
+        () => {
 
-    // Tableau principal
-    const data = [
-        ["Date", "Code", "Écart"]
-    ];
+            // Tableau principal
 
-    entries.forEach((entry, index) => {
-
-        let difference = "";
-
-        // Recherche de la précédente occurrence
-        // du même code
-        for (let i = index - 1; i >= 0; i--) {
-
-            if (entries[i].code === entry.code) {
-
-                const currentDate = new Date(entry.date);
-                const previousDate = new Date(entries[i].date);
-
-                difference =
-                    (currentDate - previousDate)
-                    / (1000 * 60 * 60 * 24);
-
-                break;
-            }
-        }
-
-        data.push([
-            formatDate(entry.date),
-            entry.code,
-            difference === "" ? "" : difference
-        ]);
-
-    });
+            const data = [
+                ["Date", "Code", "Écart"]
+            ];
 
 
-    // --------------------------------------------------
-    // RÉCAPITULATIF
-    // --------------------------------------------------
+            entries.forEach(
+                (entry, index) => {
 
-    data.push([]);
-    data.push(["RÉCAPITULATIF"]);
-    data.push(["Code", "Moyenne", "Total"]);
+                    let difference = "";
 
 
-    // Date du jour
-    const today = new Date();
+                    for (
+                        let i = index - 1;
+                        i >= 0;
+                        i--
+                    ) {
 
-    today.setHours(0, 0, 0, 0);
+                        if (
+                            entries[i].code ===
+                            entry.code
+                        ) {
+
+                            const currentDate =
+                                new Date(
+                                    entry.date
+                                );
 
 
-    ["S", "D"].forEach(code => {
-
-        const codeEntries =
-            entries.filter(entry => entry.code === code);
-
-        const total = codeEntries.length;
-
-        let average = 0;
+                            const previousDate =
+                                new Date(
+                                    entries[i].date
+                                );
 
 
-        // S'il existe au moins une occurrence
-        if (total > 0) {
+                            difference =
+                                (
+                                    currentDate -
+                                    previousDate
+                                )
+                                /
+                                (
+                                    1000 *
+                                    60 *
+                                    60 *
+                                    24
+                                );
 
-            // Première occurrence
-            const firstDate =
-                new Date(codeEntries[0].date);
 
-            // Nombre de jours depuis la première occurrence
-            const difference =
-                Math.floor(
-                    (today - firstDate)
-                    / (1000 * 60 * 60 * 24)
+                            break;
+
+                        }
+
+                    }
+
+
+                    data.push([
+                        formatDate(
+                            entry.date
+                        ),
+
+                        entry.code,
+
+                        difference === ""
+                            ? ""
+                            : difference
+                    ]);
+
+                }
+            );
+
+
+            // --------------------------------------------------
+            // RÉCAPITULATIF
+            // --------------------------------------------------
+
+            data.push([]);
+
+            data.push([
+                "RÉCAPITULATIF"
+            ]);
+
+            data.push([
+                "Code",
+                "Moyenne",
+                "Total"
+            ]);
+
+
+            // Date du jour
+
+            const today =
+                new Date();
+
+
+            today.setHours(
+                0,
+                0,
+                0,
+                0
+            );
+
+
+            ["S", "D"].forEach(
+                code => {
+
+                    const codeEntries =
+                        entries.filter(
+                            entry =>
+                                entry.code ===
+                                code
+                        );
+
+
+                    const total =
+                        codeEntries.length;
+
+
+                    let average = 0;
+
+
+                    if (total > 0) {
+
+                        const firstDate =
+                            new Date(
+                                codeEntries[0].date
+                            );
+
+
+                        const difference =
+                            Math.floor(
+                                (
+                                    today -
+                                    firstDate
+                                )
+                                /
+                                (
+                                    1000 *
+                                    60 *
+                                    60 *
+                                    24
+                                )
+                            );
+
+
+                        average =
+                            difference /
+                            total;
+
+                    }
+
+
+                    data.push([
+                        code,
+                        average,
+                        total
+                    ]);
+
+                }
+            );
+
+
+            // --------------------------------------------------
+            // CRÉATION DU FICHIER EXCEL
+            // --------------------------------------------------
+
+            const worksheet =
+                XLSX.utils.aoa_to_sheet(
+                    data
                 );
 
-            // Formule :
-            // (date du jour - première occurrence)
-            // / nombre d'occurrences
-            average =
-                difference / total;
+
+            const workbook =
+                XLSX.utils.book_new();
+
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Suivi S-D"
+            );
+
+
+            // Largeur des colonnes
+
+            worksheet["!cols"] = [
+
+                { wch: 15 },
+
+                { wch: 10 },
+
+                { wch: 12 }
+
+            ];
+
+
+            // Téléchargement
+
+            XLSX.writeFile(
+                workbook,
+                "suivi-S-D.xlsx"
+            );
 
         }
-
-
-        data.push([
-            code,
-            average,
-            total
-        ]);
-
-    });
-
-
-    // --------------------------------------------------
-    // CRÉATION DU FICHIER EXCEL
-    // --------------------------------------------------
-
-    const worksheet =
-        XLSX.utils.aoa_to_sheet(data);
-
-    const workbook =
-        XLSX.utils.book_new();
-
-
-    XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Suivi S-D"
     );
 
 
-    // Largeur des colonnes
-    worksheet["!cols"] = [
-        { wch: 15 },
-        { wch: 10 },
-        { wch: 12 }
-    ];
-
-
-    // --------------------------------------------------
-    // TÉLÉCHARGEMENT
-    // --------------------------------------------------
-
-    XLSX.writeFile(
-        workbook,
-        "suivi-S-D.xlsx"
-    );
-
-});
 // --------------------------------------------------
 // IMPORT EXCEL
 // --------------------------------------------------
 
-const importButton = document.getElementById("importButton");
-const importFile = document.getElementById("importFile");
-
-importButton.addEventListener("click", function () {
-
-    importFile.click();
-
-});
+const importButton =
+    document.getElementById(
+        "importButton"
+    );
 
 
-importFile.addEventListener("change", function (event) {
+const importFile =
+    document.getElementById(
+        "importFile"
+    );
 
-    const file = event.target.files[0];
 
-    if (!file) {
-        return;
+importButton.addEventListener(
+    "click",
+    function () {
+
+        importFile.click();
+
     }
-
-    const reader = new FileReader();
-
-    reader.onload = function (event) {
-
-        try {
-
-            const workbook = XLSX.read(
-                event.target.result,
-                { type: "array" }
-            );
-
-            const sheet =
-                workbook.Sheets[workbook.SheetNames[0]];
-
-            const rows =
-                XLSX.utils.sheet_to_json(
-                    sheet,
-                    { header: 1 }
-                );
-
-            const importedEntries = [];
+);
 
 
-            // Lire les lignes du tableau
-            for (let i = 1; i < rows.length; i++) {
+importFile.addEventListener(
+    "change",
+    function (event) {
 
-                const row = rows[i];
-
-                if (!row || !row[0] || !row[1]) {
-                    continue;
-                }
-
-                let date = row[0];
-                let code = String(row[1]).trim().toUpperCase();
+        const file =
+            event.target.files[0];
 
 
-                // Date Excel
-                if (typeof date === "number") {
+        if (!file) {
 
-                    const excelDate =
-                        new Date(
-                            Date.UTC(
-                                1899,
-                                11,
-                                30
-                            )
-                            + date * 86400000
+            return;
+
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function (event) {
+
+                try {
+
+                    const workbook =
+                        XLSX.read(
+                            event.target.result,
+                            {
+                                type: "array"
+                            }
                         );
 
-                    const year =
-                        excelDate.getUTCFullYear();
 
-                    const month =
-                        String(
-                            excelDate.getUTCMonth() + 1
-                        ).padStart(2, "0");
-
-                    const day =
-                        String(
-                            excelDate.getUTCDate()
-                        ).padStart(2, "0");
-
-                    date =
-                        `${year}-${month}-${day}`;
-                }
+                    const sheet =
+                        workbook.Sheets[
+                            workbook.SheetNames[0]
+                        ];
 
 
-                // Date sous forme JJ/MM/AA
-                else if (
-                    typeof date === "string" &&
-                    date.includes("/")
-                ) {
+                    const rows =
+                        XLSX.utils.sheet_to_json(
+                            sheet,
+                            {
+                                header: 1
+                            }
+                        );
 
-                    const parts = date.split("/");
 
-                    if (parts.length === 3) {
+                    const importedEntries = [];
 
-                        let year = parts[2];
 
-                        if (year.length === 2) {
-                            year = "20" + year;
+                    // Lire les lignes du tableau
+
+                    for (
+                        let i = 1;
+                        i < rows.length;
+                        i++
+                    ) {
+
+                        const row =
+                            rows[i];
+
+
+                        if (
+                            !row ||
+                            !row[0] ||
+                            !row[1]
+                        ) {
+
+                            continue;
+
                         }
 
-                        date =
-                            `${year}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+
+                        let date =
+                            row[0];
+
+
+                        let code =
+                            String(row[1])
+                                .trim()
+                                .toUpperCase();
+
+
+                        // Date Excel
+
+                        if (
+                            typeof date ===
+                            "number"
+                        ) {
+
+                            const excelDate =
+                                new Date(
+                                    Date.UTC(
+                                        1899,
+                                        11,
+                                        30
+                                    )
+                                    +
+                                    date *
+                                    86400000
+                                );
+
+
+                            const year =
+                                excelDate
+                                    .getUTCFullYear();
+
+
+                            const month =
+                                String(
+                                    excelDate
+                                        .getUTCMonth()
+                                        + 1
+                                )
+                                .padStart(
+                                    2,
+                                    "0"
+                                );
+
+
+                            const day =
+                                String(
+                                    excelDate
+                                        .getUTCDate()
+                                )
+                                .padStart(
+                                    2,
+                                    "0"
+                                );
+
+
+                            date =
+                                `${year}-${month}-${day}`;
+
+                        }
+
+
+                        // Date JJ/MM/AA
+
+                        else if (
+                            typeof date ===
+                                "string" &&
+                            date.includes("/")
+                        ) {
+
+                            const parts =
+                                date.split("/");
+
+
+                            if (
+                                parts.length === 3
+                            ) {
+
+                                let year =
+                                    parts[2];
+
+
+                                if (
+                                    year.length === 2
+                                ) {
+
+                                    year =
+                                        "20" +
+                                        year;
+
+                                }
+
+
+                                date =
+                                    `${year}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+
+                            }
+
+                        }
+
+
+                        if (
+                            (
+                                code === "S" ||
+                                code === "D"
+                            )
+                            &&
+                            /^\d{4}-\d{2}-\d{2}$/
+                                .test(date)
+                        ) {
+
+                            importedEntries.push({
+
+                                date: date,
+
+                                code: code
+
+                            });
+
+                        }
+
                     }
+
+
+                    if (
+                        importedEntries.length === 0
+                    ) {
+
+                        alert(
+                            "Aucune entrée valide n'a été trouvée."
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        !confirm(
+                            "Importer " +
+                            importedEntries.length +
+                            " entrées ?\n\n" +
+                            "Les données actuelles seront remplacées."
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    entries =
+                        importedEntries;
+
+
+                    // Tri chronologique
+
+                    entries.sort(
+                        function (a, b) {
+
+                            return (
+                                new Date(a.date) -
+                                new Date(b.date)
+                            );
+
+                        }
+                    );
+
+
+                    // Sauvegarde
+
+                    saveData();
+
+
+                    // Actualisation
+
+                    renderTable();
+
+                    updateSummary();
+
+
+                    alert(
+                        "Import terminé avec succès."
+                    );
+
                 }
 
 
-                if (
-                    (code === "S" || code === "D") &&
-                    /^\d{4}-\d{2}-\d{2}$/.test(date)
-                ) {
+                catch (error) {
 
-                    importedEntries.push({
-                        date: date,
-                        code: code
-                    });
+                    console.error(error);
+
+
+                    alert(
+                        "Une erreur est survenue lors de l'import."
+                    );
 
                 }
 
-            }
+            };
 
 
-            if (importedEntries.length === 0) {
-
-                alert(
-                    "Aucune entrée valide n'a été trouvée."
-                );
-
-                return;
-            }
+        reader.readAsArrayBuffer(file);
 
 
-            if (
-                !confirm(
-                    "Importer " +
-                    importedEntries.length +
-                    " entrées ?\n\n" +
-                    "Les données actuelles seront remplacées."
-                )
-            ) {
+        // Permet de sélectionner
+        // à nouveau le même fichier
 
-                return;
+        event.target.value = "";
 
-            }
+    }
+);
 
-
-            entries = importedEntries;
-
-
-            // Tri chronologique
-            entries.sort(function (a, b) {
-
-                return new Date(a.date) -
-                       new Date(b.date);
-
-            });
-
-
-            // Sauvegarde
-            saveData();
-
-
-            // Actualisation
-            renderTable();
-            updateSummary();
-
-
-            alert("Import terminé avec succès.");
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            alert(
-                "Une erreur est survenue lors de l'import."
-            );
-
-        }
-
-    };
-
-
-    reader.readAsArrayBuffer(file);
-
-    // Permet de sélectionner à nouveau le même fichier
-    event.target.value = "";
-
-});
