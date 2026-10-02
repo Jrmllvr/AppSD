@@ -6,641 +6,823 @@ const saveButton = document.getElementById("addButton");
 const dateInput = document.getElementById("dateInput");
 const tableBody = document.querySelector("tbody");
 
-const importButton = document.getElementById("importButton");
-const fileInput = document.getElementById("fileInput");
-
 let entries = JSON.parse(localStorage.getItem("entriesSD")) || [];
 
 let selectedCode = null;
 let editingIndex = null;
 
 
-// ============================================================
+// --------------------------------------------------
 // SAUVEGARDE
-// ============================================================
+// --------------------------------------------------
 
 function saveData() {
-    localStorage.setItem("entriesSD", JSON.stringify(entries));
-}
 
-
-// ============================================================
-// CALCUL DE DIFFÉRENCE DE JOURS
-// ============================================================
-//
-// 20 → 25 = 5 jours
-// 20 → 21 = 1 jour
-// 20 → 20 = 0 jour
-//
-// Les heures ne sont pas prises en compte.
-// ============================================================
-
-function differenceInDays(startDate, endDate) {
-
-    const start = new Date(startDate + "T00:00:00");
-    const end = new Date(endDate + "T00:00:00");
-
-    return Math.round(
-        (end - start) / (1000 * 60 * 60 * 24)
+    localStorage.setItem(
+        "entriesSD",
+        JSON.stringify(entries)
     );
+
 }
 
 
-// ============================================================
-// DATE DU JOUR
-// ============================================================
+// --------------------------------------------------
+// OUVRIR POUR AJOUTER
+// --------------------------------------------------
 
-function getToday() {
+openButton.addEventListener("click", () => {
+
+    editingIndex = null;
 
     const today = new Date();
 
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+    const year =
+        today.getFullYear();
 
-    return `${year}-${month}-${day}`;
-}
+    const month =
+        String(today.getMonth() + 1)
+        .padStart(2, "0");
 
-
-// ============================================================
-// FORMATAGE DATE
-// ============================================================
-
-function formatDate(date) {
-
-    const parts = date.split("-");
-
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(2)}`;
-}
+    const day =
+        String(today.getDate())
+        .padStart(2, "0");
 
 
-// ============================================================
-// OUVERTURE DE LA FENÊTRE AJOUT
-// ============================================================
+    dateInput.value =
+        `${year}-${month}-${day}`;
 
-openButton.addEventListener("click", function () {
 
-    editingIndex = null;
     selectedCode = null;
 
-    dateInput.value = getToday();
 
-    document.querySelectorAll(".code-button").forEach(button => {
-        button.classList.remove("selected");
-    });
+    document
+        .querySelectorAll(".code-button")
+        .forEach(button => {
+
+            button.style.background = "";
+
+        });
+
 
     saveButton.textContent = "Ajouter";
 
-    modal.classList.add("show");
+    modal.style.display = "flex";
+
 });
 
 
-// ============================================================
-// SÉLECTION DU CODE S / D
-// ============================================================
+// --------------------------------------------------
+// CHOIX DU CODE
+// --------------------------------------------------
 
-document.querySelectorAll(".code-button").forEach(button => {
+document
+    .querySelectorAll(".code-button")
+    .forEach(button => {
 
-    button.addEventListener("click", function () {
+        button.addEventListener("click", () => {
 
-        document.querySelectorAll(".code-button").forEach(btn => {
-            btn.classList.remove("selected");
+            selectedCode =
+                button.dataset.code;
+
+
+            document
+                .querySelectorAll(".code-button")
+                .forEach(b => {
+
+                    b.style.background = "";
+
+                });
+
+
+            button.style.background =
+                "#dbeafe";
+
         });
 
-        this.classList.add("selected");
-
-        selectedCode = this.dataset.code;
     });
 
-});
 
-
-// ============================================================
+// --------------------------------------------------
 // ANNULER
-// ============================================================
+// --------------------------------------------------
 
-cancelButton.addEventListener("click", function () {
+cancelButton.addEventListener("click", () => {
 
-    modal.classList.remove("show");
+    modal.style.display = "none";
 
-    editingIndex = null;
-    selectedCode = null;
 });
 
 
-// ============================================================
-// AJOUT / MODIFICATION
-// ============================================================
+// --------------------------------------------------
+// AJOUTER OU MODIFIER
+// --------------------------------------------------
 
-saveButton.addEventListener("click", function () {
+saveButton.addEventListener("click", () => {
 
-    const date = dateInput.value;
+    if (!dateInput.value) {
 
-    if (!date) {
-        alert("Veuillez sélectionner une date.");
+        alert(
+            "Veuillez choisir une date."
+        );
+
         return;
     }
+
 
     if (!selectedCode) {
-        alert("Veuillez sélectionner S ou D.");
+
+        alert(
+            "Veuillez choisir S ou D."
+        );
+
         return;
     }
+
+
+    const newEntry = {
+
+        date: dateInput.value,
+
+        code: selectedCode
+
+    };
 
 
     // Modification
+
     if (editingIndex !== null) {
 
-        entries[editingIndex] = {
-            date: date,
-            code: selectedCode
-        };
+        entries[editingIndex] =
+            newEntry;
 
     }
 
+
     // Nouvelle entrée
+
     else {
 
-        entries.push({
-            date: date,
-            code: selectedCode
-        });
+        entries.push(newEntry);
 
     }
 
 
     // Tri chronologique
+
     entries.sort((a, b) => {
-        return a.date.localeCompare(b.date);
+
+        return new Date(a.date) -
+               new Date(b.date);
+
     });
 
 
     saveData();
 
     renderTable();
+
     updateSummary();
 
-    modal.classList.remove("show");
 
-    editingIndex = null;
-    selectedCode = null;
+    modal.style.display = "none";
+
 });
 
 
-// ============================================================
-// AFFICHAGE DU TABLEAU
-// ============================================================
+// --------------------------------------------------
+// AFFICHER LE TABLEAU
+// --------------------------------------------------
 
 function renderTable() {
 
     tableBody.innerHTML = "";
 
+
+    if (entries.length === 0) {
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+            <td colspan="4" class="empty">
+                Aucune donnée
+            </td>
+        `;
+
+
+        tableBody.appendChild(row);
+
+        return;
+    }
+
+
     entries.forEach((entry, index) => {
 
-        const row = document.createElement("tr");
+        let difference = "—";
 
 
-        // ----------------------------------------------------
-        // DATE
-        // ----------------------------------------------------
+        // Recherche de la précédente occurrence
+        // du même code
 
-        const dateCell = document.createElement("td");
+        for (
+            let i = index - 1;
+            i >= 0;
+            i--
+        ) {
 
-        dateCell.textContent = formatDate(entry.date);
+            if (
+                entries[i].code ===
+                entry.code
+            ) {
 
-        row.appendChild(dateCell);
+                const currentDate =
+                    new Date(entry.date);
 
-
-        // ----------------------------------------------------
-        // CODE
-        // ----------------------------------------------------
-
-        const codeCell = document.createElement("td");
-
-        codeCell.textContent = entry.code;
-
-        row.appendChild(codeCell);
+                const previousDate =
+                    new Date(entries[i].date);
 
 
-        // ----------------------------------------------------
-        // ÉCART
-        // ----------------------------------------------------
+                const diff =
+                    (currentDate - previousDate)
+                    /
+                    (1000 * 60 * 60 * 24);
 
-        const differenceCell = document.createElement("td");
 
-        let previousDate = null;
+                difference =
+                    `${diff} j`;
 
-        for (let i = index - 1; i >= 0; i--) {
-
-            if (entries[i].code === entry.code) {
-
-                previousDate = entries[i].date;
 
                 break;
+
             }
-        }
-
-
-        if (previousDate) {
-
-            const difference = differenceInDays(
-                previousDate,
-                entry.date
-            );
-
-            differenceCell.textContent = `${difference} j`;
-
-        }
-        else {
-
-            differenceCell.textContent = "—";
 
         }
 
-        row.appendChild(differenceCell);
+
+        const row =
+            document.createElement("tr");
 
 
-        // ----------------------------------------------------
-        // SUPPRESSION
-        // ----------------------------------------------------
-
-        const deleteCell = document.createElement("td");
-
-        const deleteButton = document.createElement("button");
-
-        deleteButton.textContent = "×";
-
-        deleteButton.className = "delete-button";
-
-        deleteButton.addEventListener("click", function (event) {
-
-            event.stopPropagation();
-
-            deleteEntry(index);
-
-        });
-
-        deleteCell.appendChild(deleteButton);
-
-        row.appendChild(deleteCell);
+        row.innerHTML = `
+            <td>${formatDate(entry.date)}</td>
+            <td><strong>${entry.code}</strong></td>
+            <td>${difference}</td>
+            <td>
+                <button class="delete-button">
+                    ×
+                </button>
+            </td>
+        `;
 
 
-        // ----------------------------------------------------
-        // MODIFICATION EN CLIQUANT SUR LA LIGNE
-        // ----------------------------------------------------
+        // Cliquer sur la ligne = modifier
 
-        row.addEventListener("click", function () {
+        row.addEventListener("click", () => {
 
             editEntry(index);
 
         });
 
 
+        // Bouton supprimer
+
+        const deleteButton =
+            row.querySelector(
+                ".delete-button"
+            );
+
+
+        deleteButton.addEventListener(
+            "click",
+            (event) => {
+
+                event.stopPropagation();
+
+                deleteEntry(index);
+
+            }
+        );
+
+
         tableBody.appendChild(row);
+
     });
+
 }
 
 
-// ============================================================
-// MODIFIER UNE ENTRÉE
-// ============================================================
+// --------------------------------------------------
+// MODIFIER
+// --------------------------------------------------
 
 function editEntry(index) {
 
-    const entry = entries[index];
-
     editingIndex = index;
 
-    selectedCode = entry.code;
 
-    dateInput.value = entry.date;
-
-
-    document.querySelectorAll(".code-button").forEach(button => {
-
-        button.classList.remove("selected");
-
-        if (button.dataset.code === entry.code) {
-            button.classList.add("selected");
-        }
-
-    });
+    const entry =
+        entries[index];
 
 
-    saveButton.textContent = "Modifier";
+    dateInput.value =
+        entry.date;
 
-    modal.classList.add("show");
+
+    selectedCode =
+        entry.code;
+
+
+    document
+        .querySelectorAll(".code-button")
+        .forEach(button => {
+
+            if (
+                button.dataset.code ===
+                entry.code
+            ) {
+
+                button.style.background =
+                    "#dbeafe";
+
+            } else {
+
+                button.style.background =
+                    "";
+
+            }
+
+        });
+
+
+    saveButton.textContent =
+        "Modifier";
+
+
+    modal.style.display =
+        "flex";
+
 }
 
 
-// ============================================================
-// SUPPRIMER UNE ENTRÉE
-// ============================================================
+// --------------------------------------------------
+// SUPPRIMER
+// --------------------------------------------------
 
 function deleteEntry(index) {
 
-    if (!confirm("Supprimer cette entrée ?")) {
+    if (
+        !confirm(
+            "Supprimer cette entrée ?"
+        )
+    ) {
+
         return;
+
     }
 
+
     entries.splice(index, 1);
+
 
     saveData();
 
     renderTable();
 
     updateSummary();
+
 }
 
 
-// ============================================================
-// MISE À JOUR DES RÉSUMÉS
-// ============================================================
+// --------------------------------------------------
+// MOYENNES ET TOTAUX
+// --------------------------------------------------
 
 function updateSummary() {
 
-    updateCodeSummary("S");
-    updateCodeSummary("D");
+    updateCodeSummary(
+        "S",
+        "averageS",
+        "totalS"
+    );
+
+
+    updateCodeSummary(
+        "D",
+        "averageD",
+        "totalD"
+    );
+
 }
 
 
-// ============================================================
-// RÉSUMÉ S / D
-// ============================================================
+function updateCodeSummary(
+    code,
+    averageId,
+    totalId
+) {
 
-function updateCodeSummary(code) {
-
-    const codeEntries = entries.filter(entry => {
-        return entry.code === code;
-    });
-
-
-    const daysElement =
-        document.getElementById(`days${code}`);
-
-    const totalElement =
-        document.getElementById(`total${code}`);
-
-    const averageElement =
-        document.getElementById(`average${code}`);
-
-
-    // --------------------------------------------------------
-    // AUCUNE ENTRÉE
-    // --------------------------------------------------------
-
-    if (codeEntries.length === 0) {
-
-        daysElement.textContent = "—";
-
-        totalElement.textContent = "0";
-
-        averageElement.textContent = "—";
-
-        return;
-    }
-
-
-    // --------------------------------------------------------
-    // TRI DES DATES
-    // --------------------------------------------------------
-
-    codeEntries.sort((a, b) => {
-        return a.date.localeCompare(b.date);
-    });
-
-
-    const firstDate =
-        codeEntries[0].date;
-
-    const lastDate =
-        codeEntries[codeEntries.length - 1].date;
-
-    const today =
-        getToday();
-
-
-    // --------------------------------------------------------
-    // JOURS DEPUIS LA DERNIÈRE OCCURRENCE
-    // --------------------------------------------------------
-
-    const daysSinceLast =
-        differenceInDays(
-            lastDate,
-            today
+    const codeEntries =
+        entries.filter(
+            entry =>
+                entry.code === code
         );
 
-
-    daysElement.textContent =
-        daysSinceLast;
-
-
-    // --------------------------------------------------------
-    // TOTAL
-    // --------------------------------------------------------
 
     const total =
         codeEntries.length;
 
-    totalElement.textContent =
-        total;
+
+    const daysId =
+        code === "S"
+            ? "daysS"
+            : "daysD";
 
 
-    // --------------------------------------------------------
+    // Total d'occurrences
+
+    document
+        .getElementById(totalId)
+        .textContent = total;
+
+
+    // Aucune occurrence
+
+    if (total === 0) {
+
+        document
+            .getElementById(daysId)
+            .textContent = "—";
+
+
+        document
+            .getElementById(averageId)
+            .textContent = "—";
+
+
+        return;
+
+    }
+
+
+    // --------------------------------------------------
+    // DERNIÈRE OCCURRENCE
+    // --------------------------------------------------
+
+    const lastDate =
+        new Date(
+            codeEntries[
+                codeEntries.length - 1
+            ].date
+        );
+
+
+    // Date du jour
+
+    const today =
+        new Date();
+
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    // Nombre de jours depuis
+    // la DERNIÈRE occurrence
+
+    const differenceSinceLast =
+        Math.floor(
+            (
+                today -
+                lastDate
+            )
+            /
+            (1000 * 60 * 60 * 24)
+        );
+
+
+    // Affichage des jours
+
+    document
+        .getElementById(daysId)
+        .textContent =
+            `${differenceSinceLast} jours`;
+
+
+    // --------------------------------------------------
     // MOYENNE
-    // --------------------------------------------------------
+    // --------------------------------------------------
+    // La moyenne reste calculée selon :
+    //
+    // (date du jour - première occurrence)
+    // / nombre d'occurrences
+    // --------------------------------------------------
 
-    const totalDays =
-        differenceInDays(
-            firstDate,
-            today
+    const firstDate =
+        new Date(
+            codeEntries[0].date
+        );
+
+
+    const differenceSinceFirst =
+        Math.floor(
+            (
+                today -
+                firstDate
+            )
+            /
+            (1000 * 60 * 60 * 24)
         );
 
 
     const average =
-        totalDays / total;
+        differenceSinceFirst /
+        total;
 
 
-    averageElement.textContent =
-        average.toFixed(1);
+    document
+        .getElementById(averageId)
+        .textContent =
+            `${average.toFixed(1)} jours`;
+
 }
 
 
-// ============================================================
+// --------------------------------------------------
+// FORMAT DATE
+// --------------------------------------------------
+
+function formatDate(date) {
+
+    const parts =
+        date.split("-");
+
+
+    return `
+        ${parts[2]}/${parts[1]}/${parts[0].slice(2)}
+    `;
+
+}
+
+
+// --------------------------------------------------
+// INITIALISATION
+// --------------------------------------------------
+
+renderTable();
+
+updateSummary();
+
+
+// --------------------------------------------------
 // EXPORT EXCEL
-// ============================================================
+// --------------------------------------------------
 
-document.getElementById("exportButton").addEventListener(
-    "click",
-    function () {
+document
+    .getElementById("exportButton")
+    .addEventListener(
+        "click",
+        () => {
 
-        const worksheetData = [];
+            // Tableau principal
 
-
-        // ----------------------------------------------------
-        // EN-TÊTES
-        // ----------------------------------------------------
-
-        worksheetData.push([
-            "Date",
-            "Code",
-            "Écart"
-        ]);
+            const data = [
+                ["Date", "Code", "Écart"]
+            ];
 
 
-        // ----------------------------------------------------
-        // DONNÉES
-        // ----------------------------------------------------
+            entries.forEach(
+                (entry, index) => {
 
-        entries.forEach((entry, index) => {
+                    let difference = "";
 
-            let previousDate = null;
 
-            for (let i = index - 1; i >= 0; i--) {
+                    for (
+                        let i = index - 1;
+                        i >= 0;
+                        i--
+                    ) {
 
-                if (entries[i].code === entry.code) {
+                        if (
+                            entries[i].code ===
+                            entry.code
+                        ) {
 
-                    previousDate =
-                        entries[i].date;
+                            const currentDate =
+                                new Date(
+                                    entry.date
+                                );
 
-                    break;
+
+                            const previousDate =
+                                new Date(
+                                    entries[i].date
+                                );
+
+
+                            difference =
+                                (
+                                    currentDate -
+                                    previousDate
+                                )
+                                /
+                                (
+                                    1000 *
+                                    60 *
+                                    60 *
+                                    24
+                                );
+
+
+                            break;
+
+                        }
+
+                    }
+
+
+                    data.push([
+                        formatDate(
+                            entry.date
+                        ),
+
+                        entry.code,
+
+                        difference === ""
+                            ? ""
+                            : difference
+                    ]);
+
                 }
-            }
+            );
 
 
-            let difference = "";
+            // --------------------------------------------------
+            // RÉCAPITULATIF
+            // --------------------------------------------------
 
+            data.push([]);
 
-            if (previousDate) {
-
-                difference =
-                    differenceInDays(
-                        previousDate,
-                        entry.date
-                    );
-            }
-
-
-            worksheetData.push([
-                formatDate(entry.date),
-                entry.code,
-                difference
+            data.push([
+                "RÉCAPITULATIF"
             ]);
 
-        });
+            data.push([
+                "Code",
+                "Moyenne",
+                "Total"
+            ]);
 
 
-        // ----------------------------------------------------
-        // RÉCAPITULATIF
-        // ----------------------------------------------------
-
-        worksheetData.push([]);
-
-        worksheetData.push([
-            "RÉCAPITULATIF"
-        ]);
-
-        worksheetData.push([
-            "Code",
-            "Moyenne",
-            "Total"
-        ]);
-
-
-        ["S", "D"].forEach(code => {
-
-            const codeEntries =
-                entries.filter(entry => {
-                    return entry.code === code;
-                });
-
-
-            if (codeEntries.length === 0) {
-
-                worksheetData.push([
-                    code,
-                    "",
-                    0
-                ]);
-
-                return;
-            }
-
-
-            codeEntries.sort((a, b) => {
-                return a.date.localeCompare(b.date);
-            });
-
-
-            const firstDate =
-                codeEntries[0].date;
+            // Date du jour
 
             const today =
-                getToday();
+                new Date();
 
 
-            const totalDays =
-                differenceInDays(
-                    firstDate,
-                    today
+            today.setHours(
+                0,
+                0,
+                0,
+                0
+            );
+
+
+            ["S", "D"].forEach(
+                code => {
+
+                    const codeEntries =
+                        entries.filter(
+                            entry =>
+                                entry.code ===
+                                code
+                        );
+
+
+                    const total =
+                        codeEntries.length;
+
+
+                    let average = 0;
+
+
+                    if (total > 0) {
+
+                        const firstDate =
+                            new Date(
+                                codeEntries[0].date
+                            );
+
+
+                        const difference =
+                            Math.floor(
+                                (
+                                    today -
+                                    firstDate
+                                )
+                                /
+                                (
+                                    1000 *
+                                    60 *
+                                    60 *
+                                    24
+                                )
+                            );
+
+
+                        average =
+                            difference /
+                            total;
+
+                    }
+
+
+                    data.push([
+                        code,
+                        average,
+                        total
+                    ]);
+
+                }
+            );
+
+
+            // --------------------------------------------------
+            // CRÉATION DU FICHIER EXCEL
+            // --------------------------------------------------
+
+            const worksheet =
+                XLSX.utils.aoa_to_sheet(
+                    data
                 );
 
 
-            const average =
-                totalDays / codeEntries.length;
+            const workbook =
+                XLSX.utils.book_new();
 
 
-            worksheetData.push([
-                code,
-                Number(average.toFixed(1)),
-                codeEntries.length
-            ]);
-
-        });
-
-
-        // ----------------------------------------------------
-        // CRÉATION DU FICHIER
-        // ----------------------------------------------------
-
-        const worksheet =
-            XLSX.utils.aoa_to_sheet(
-                worksheetData
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Suivi S-D"
             );
 
-        const workbook =
-            XLSX.utils.book_new();
+
+            // Largeur des colonnes
+
+            worksheet["!cols"] = [
+
+                { wch: 15 },
+
+                { wch: 10 },
+
+                { wch: 12 }
+
+            ];
 
 
-        XLSX.utils.book_append_sheet(
-            workbook,
-            worksheet,
-            "S-D"
-        );
+            // Téléchargement
+
+            XLSX.writeFile(
+                workbook,
+                "suivi-S-D.xlsx"
+            );
+
+        }
+    );
 
 
-        XLSX.writeFile(
-            workbook,
-            "suivi-S-D.xlsx"
-        );
-    }
-);
-
-
-// ============================================================
+// --------------------------------------------------
 // IMPORT EXCEL
-// ============================================================
+// --------------------------------------------------
+
+const importButton =
+    document.getElementById(
+        "importButton"
+    );
+
+
+const importFile =
+    document.getElementById(
+        "importFile"
+    );
+
 
 importButton.addEventListener(
     "click",
     function () {
 
-        fileInput.click();
+        importFile.click();
 
     }
 );
 
 
-fileInput.addEventListener(
+importFile.addEventListener(
     "change",
     function (event) {
 
@@ -649,7 +831,9 @@ fileInput.addEventListener(
 
 
         if (!file) {
+
             return;
+
         }
 
 
@@ -658,39 +842,30 @@ fileInput.addEventListener(
 
 
         reader.onload =
-            function (e) {
+            function (event) {
 
                 try {
 
-                    const data =
-                        new Uint8Array(
-                            e.target.result
-                        );
-
-
                     const workbook =
                         XLSX.read(
-                            data,
+                            event.target.result,
                             {
                                 type: "array"
                             }
                         );
 
 
-                    const sheetName =
-                        workbook.SheetNames[0];
-
-
-                    const worksheet =
-                        workbook.Sheets[sheetName];
+                    const sheet =
+                        workbook.Sheets[
+                            workbook.SheetNames[0]
+                        ];
 
 
                     const rows =
                         XLSX.utils.sheet_to_json(
-                            worksheet,
+                            sheet,
                             {
-                                header: 1,
-                                defval: ""
+                                header: 1
                             }
                         );
 
@@ -698,9 +873,7 @@ fileInput.addEventListener(
                     const importedEntries = [];
 
 
-                    // ----------------------------------------
-                    // LECTURE DES LIGNES
-                    // ----------------------------------------
+                    // Lire les lignes du tableau
 
                     for (
                         let i = 1;
@@ -714,118 +887,97 @@ fileInput.addEventListener(
 
                         if (
                             !row ||
-                            row.length < 2
+                            !row[0] ||
+                            !row[1]
                         ) {
+
                             continue;
+
                         }
 
 
-                        let dateValue =
+                        let date =
                             row[0];
 
-                        let codeValue =
-                            row[1];
+
+                        let code =
+                            String(row[1])
+                                .trim()
+                                .toUpperCase();
 
 
-                        // ------------------------------------
-                        // CODE
-                        // ------------------------------------
-
-                        if (
-                            typeof codeValue === "string"
-                        ) {
-
-                            codeValue =
-                                codeValue
-                                    .trim()
-                                    .toUpperCase();
-                        }
-
+                        // Date Excel
 
                         if (
-                            codeValue !== "S" &&
-                            codeValue !== "D"
-                        ) {
-
-                            continue;
-                        }
-
-
-                        // ------------------------------------
-                        // DATE
-                        // ------------------------------------
-
-                        let date = null;
-
-
-                        // Date Excel numérique
-                        if (
-                            typeof dateValue === "number"
+                            typeof date ===
+                            "number"
                         ) {
 
                             const excelDate =
-                                XLSX.SSF.parse_date_code(
-                                    dateValue
+                                new Date(
+                                    Date.UTC(
+                                        1899,
+                                        11,
+                                        30
+                                    )
+                                    +
+                                    date *
+                                    86400000
                                 );
 
 
-                            if (excelDate) {
-
-                                const year =
-                                    excelDate.y;
-
-                                const month =
-                                    String(
-                                        excelDate.m
-                                    ).padStart(2, "0");
-
-                                const day =
-                                    String(
-                                        excelDate.d
-                                    ).padStart(2, "0");
+                            const year =
+                                excelDate
+                                    .getUTCFullYear();
 
 
-                                date =
-                                    `${year}-${month}-${day}`;
-                            }
+                            const month =
+                                String(
+                                    excelDate
+                                        .getUTCMonth()
+                                        + 1
+                                )
+                                .padStart(
+                                    2,
+                                    "0"
+                                );
+
+
+                            const day =
+                                String(
+                                    excelDate
+                                        .getUTCDate()
+                                )
+                                .padStart(
+                                    2,
+                                    "0"
+                                );
+
+
+                            date =
+                                `${year}-${month}-${day}`;
+
                         }
 
 
-                        // Date texte
+                        // Date JJ/MM/AA
+
                         else if (
-                            typeof dateValue === "string"
+                            typeof date ===
+                                "string" &&
+                            date.includes("/")
                         ) {
 
-                            const value =
-                                dateValue.trim();
+                            const parts =
+                                date.split("/");
 
 
-                            // JJ/MM/AA
-                            // JJ/MM/AAAA
-                            const match =
-                                value.match(
-                                    /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/
-                                );
-
-
-                            if (match) {
-
-                                const day =
-                                    match[1].padStart(
-                                        2,
-                                        "0"
-                                    );
-
-
-                                const month =
-                                    match[2].padStart(
-                                        2,
-                                        "0"
-                                    );
-
+                            if (
+                                parts.length === 3
+                            ) {
 
                                 let year =
-                                    match[3];
+                                    parts[2];
 
 
                                 if (
@@ -833,69 +985,94 @@ fileInput.addEventListener(
                                 ) {
 
                                     year =
-                                        "20" + year;
+                                        "20" +
+                                        year;
+
                                 }
 
 
                                 date =
-                                    `${year}-${month}-${day}`;
+                                    `${year}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+
                             }
+
                         }
 
 
-                        // ------------------------------------
-                        // AJOUT
-                        // ------------------------------------
-
-                        if (date) {
+                        if (
+                            (
+                                code === "S" ||
+                                code === "D"
+                            )
+                            &&
+                            /^\d{4}-\d{2}-\d{2}$/
+                                .test(date)
+                        ) {
 
                             importedEntries.push({
+
                                 date: date,
-                                code: codeValue
+
+                                code: code
+
                             });
 
                         }
+
                     }
 
-
-                    // ----------------------------------------
-                    // VÉRIFICATION
-                    // ----------------------------------------
 
                     if (
                         importedEntries.length === 0
                     ) {
 
                         alert(
-                            "Aucune donnée S/D valide n'a été trouvée dans le fichier."
+                            "Aucune entrée valide n'a été trouvée."
                         );
 
                         return;
+
                     }
 
 
-                    // ----------------------------------------
-                    // TRI
-                    // ----------------------------------------
+                    if (
+                        !confirm(
+                            "Importer " +
+                            importedEntries.length +
+                            " entrées ?\n\n" +
+                            "Les données actuelles seront remplacées."
+                        )
+                    ) {
 
-                    importedEntries.sort(
-                        (a, b) => {
-                            return a.date.localeCompare(
-                                b.date
-                            );
-                        }
-                    );
+                        return;
 
+                    }
 
-                    // ----------------------------------------
-                    // REMPLACEMENT DES DONNÉES
-                    // ----------------------------------------
 
                     entries =
                         importedEntries;
 
 
+                    // Tri chronologique
+
+                    entries.sort(
+                        function (a, b) {
+
+                            return (
+                                new Date(a.date) -
+                                new Date(b.date)
+                            );
+
+                        }
+                    );
+
+
+                    // Sauvegarde
+
                     saveData();
+
+
+                    // Actualisation
 
                     renderTable();
 
@@ -903,44 +1080,34 @@ fileInput.addEventListener(
 
 
                     alert(
-                        `${entries.length} entrée(s) importée(s).`
+                        "Import terminé avec succès."
                     );
 
                 }
+
 
                 catch (error) {
 
-                    console.error(
-                        "Erreur lors de l'importation :",
-                        error
-                    );
+                    console.error(error);
 
 
                     alert(
-                        "Une erreur est survenue lors de l'importation du fichier Excel."
+                        "Une erreur est survenue lors de l'import."
                     );
 
                 }
 
-                finally {
-
-                    // Permet de sélectionner à nouveau
-                    // le même fichier
-                    fileInput.value = "";
-                }
             };
 
 
         reader.readAsArrayBuffer(file);
 
+
+        // Permet de sélectionner
+        // à nouveau le même fichier
+
+        event.target.value = "";
+
     }
 );
 
-
-// ============================================================
-// INITIALISATION
-// ============================================================
-
-renderTable();
-
-updateSummary();
