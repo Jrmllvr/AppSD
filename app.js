@@ -27,6 +27,35 @@ function saveData() {
 
 
 // --------------------------------------------------
+// CALCUL DE DIFFÉRENCE DE JOURS
+// --------------------------------------------------
+//
+// 20 → 25 = 5
+// 20 → 21 = 1
+// 20 → 20 = 0
+//
+// On utilise uniquement les dates calendaires.
+// --------------------------------------------------
+
+function differenceInDays(startDate, endDate) {
+
+    const start =
+        new Date(startDate + "T00:00:00");
+
+    const end =
+        new Date(endDate + "T00:00:00");
+
+
+    return Math.round(
+        (end - start)
+        /
+        (1000 * 60 * 60 * 24)
+    );
+
+}
+
+
+// --------------------------------------------------
 // OUVRIR POUR AJOUTER
 // --------------------------------------------------
 
@@ -236,17 +265,11 @@ function renderTable() {
                 entry.code
             ) {
 
-                const currentDate =
-                    new Date(entry.date);
-
-                const previousDate =
-                    new Date(entries[i].date);
-
-
                 const diff =
-                    (currentDate - previousDate)
-                    /
-                    (1000 * 60 * 60 * 24);
+                    differenceInDays(
+                        entries[i].date,
+                        entry.date
+                    );
 
 
                 difference =
@@ -466,42 +489,45 @@ function updateCodeSummary(
 
 
     // --------------------------------------------------
+    // TRI DES OCCURRENCES
+    // --------------------------------------------------
+
+    codeEntries.sort((a, b) => {
+
+        return new Date(a.date) -
+               new Date(b.date);
+
+    });
+
+
+    // --------------------------------------------------
     // DERNIÈRE OCCURRENCE
     // --------------------------------------------------
 
     const lastDate =
-        new Date(
-            codeEntries[
-                codeEntries.length - 1
-            ].date
-        );
+        codeEntries[
+            codeEntries.length - 1
+        ].date;
 
 
-    // Date du jour
+    // Date du jour au format YYYY-MM-DD
 
     const today =
         new Date();
 
-
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+    const todayString =
+        `${today.getFullYear()}-` +
+        `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+        `${String(today.getDate()).padStart(2, "0")}`;
 
 
     // Nombre de jours depuis
     // la DERNIÈRE occurrence
 
     const differenceSinceLast =
-        Math.floor(
-            (
-                today -
-                lastDate
-            )
-            /
-            (1000 * 60 * 60 * 24)
+        differenceInDays(
+            lastDate,
+            todayString
         );
 
 
@@ -516,26 +542,22 @@ function updateCodeSummary(
     // --------------------------------------------------
     // MOYENNE
     // --------------------------------------------------
-    // La moyenne reste calculée selon :
     //
     // (date du jour - première occurrence)
     // / nombre d'occurrences
+    //
+    // Avec le nouveau calcul :
+    // 20 → 25 = 5
     // --------------------------------------------------
 
     const firstDate =
-        new Date(
-            codeEntries[0].date
-        );
+        codeEntries[0].date;
 
 
     const differenceSinceFirst =
-        Math.floor(
-            (
-                today -
-                firstDate
-            )
-            /
-            (1000 * 60 * 60 * 24)
+        differenceInDays(
+            firstDate,
+            todayString
         );
 
 
@@ -612,29 +634,10 @@ document
                             entry.code
                         ) {
 
-                            const currentDate =
-                                new Date(
-                                    entry.date
-                                );
-
-
-                            const previousDate =
-                                new Date(
-                                    entries[i].date
-                                );
-
-
                             difference =
-                                (
-                                    currentDate -
-                                    previousDate
-                                )
-                                /
-                                (
-                                    1000 *
-                                    60 *
-                                    60 *
-                                    24
+                                differenceInDays(
+                                    entries[i].date,
+                                    entry.date
                                 );
 
 
@@ -683,13 +686,10 @@ document
             const today =
                 new Date();
 
-
-            today.setHours(
-                0,
-                0,
-                0,
-                0
-            );
+            const todayString =
+                `${today.getFullYear()}-` +
+                `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+                `${String(today.getDate()).padStart(2, "0")}`;
 
 
             ["S", "D"].forEach(
@@ -712,25 +712,24 @@ document
 
                     if (total > 0) {
 
+                        codeEntries.sort(
+                            (a, b) => {
+
+                                return new Date(a.date) -
+                                       new Date(b.date);
+
+                            }
+                        );
+
+
                         const firstDate =
-                            new Date(
-                                codeEntries[0].date
-                            );
+                            codeEntries[0].date;
 
 
                         const difference =
-                            Math.floor(
-                                (
-                                    today -
-                                    firstDate
-                                )
-                                /
-                                (
-                                    1000 *
-                                    60 *
-                                    60 *
-                                    24
-                                )
+                            differenceInDays(
+                                firstDate,
+                                todayString
                             );
 
 
@@ -1110,4 +1109,3 @@ importFile.addEventListener(
 
     }
 );
-
